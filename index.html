@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b18">
+<meta name="description" content="Your personal Beach Buggy Racing gaming companion.">
+<title>BBR • Gaming Companion</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#080b18; --panel:#11182b; --line:#28375a;
+  --blue:#62dcff; --purple:#bd8aff; --muted:#9baac9;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:
+  radial-gradient(ellipse at top left,#182957 0,transparent 45%),
+  radial-gradient(ellipse at top right,#35184c 0,transparent 38%),var(--bg);
+  color:#f4f7ff; font:15px system-ui,-apple-system,sans-serif;
+}
+header,main,footer { max-width:850px; margin:auto; padding:18px; }
+header { padding-top:28px; }
+.eyebrow { color:var(--blue); letter-spacing:3px; font-size:11px; font-weight:800; }
+h1 { font-size:clamp(27px,7vw,43px); margin:8px 0; line-height:1.1; }
+h1 span { color:var(--purple); }
+.subtitle,.muted { color:var(--muted); line-height:1.6; }
+.panel {
+  background:linear-gradient(145deg,#141d34f5,#101426f5);
+  border:1px solid var(--line); border-radius:17px;
+  padding:17px; margin:15px 0; box-shadow:0 10px 30px #0003;
+}
+h2 { font-size:19px; margin:0 0 12px; }
+h3 { font-size:15px; margin:0 0 8px; }
+.stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.stat { background:#0b1225; border:1px solid var(--line); border-radius:13px; padding:12px 8px; min-width:0; }
+.stat strong { display:block; color:var(--blue); font-size:25px; overflow-wrap:anywhere; }
+.stat span { font-size:11px; color:var(--muted); }
+nav { display:flex; gap:8px; overflow-x:auto; padding:5px 0 12px; }
+nav button { flex:0 0 auto; }
+button,.button {
+  border:1px solid #465b8d; border-radius:10px; padding:11px 13px;
+  background:#172441; color:white; font:inherit; cursor:pointer;
+}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+button.primary { background:linear-gradient(110deg,#12618b,#56368e); border-color:#6aa6ef; }
+button.danger { border-color:#88485e; background:#351a2b; }
+button.active { background:#243967; border-color:var(--blue); color:var(--blue); }
+button.small { padding:7px 10px; font-size:12px; }
+form { display:grid; gap:10px; }
+label { display:grid; gap:6px; color:#d5def5; font-size:13px; }
+input,select,textarea {
+  width:100%; min-width:0; padding:12px; border-radius:10px;
+  border:1px solid #344366; background:#090f20; color:white; font:inherit;
+}
+textarea { resize:vertical; min-height:85px; }
+.row { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.item { border:1px solid var(--line); background:#0b1225; border-radius:12px; padding:13px; margin:9px 0; }
+.item p { color:var(--muted); white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.5; }
+.item .value { color:var(--blue); font-size:20px; font-weight:750; }
+.item.done { opacity:.65; }
+.item.done h3 { text-decoration:line-through; }
+.actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.check { display:flex; gap:10px; align-items:flex-start; }
+.check input { width:19px; height:19px; margin-top:2px; accent-color:#a887ff; }
+.hidden { display:none !important; }
+.empty { text-align:center; color:var(--muted); padding:22px 5px; }
+footer { text-align:center; font-size:12px; color:var(--muted); padding-bottom:35px; }
+@media(max-width:480px) {
+  header,main,footer { padding-left:13px; padding-right:13px; }
+  .grid { grid-template-columns:1fr; }
+  .panel { padding:14px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">PERSONAL GAMING SYSTEM / 001</div>
+  <h1>BEACH BUGGY <span>COMPANION</span></h1>
+  <p class="subtitle">Track your records. Master your tricks. Level up your skills.</p>
+  <section class="stats" aria-label="Your statistics">
+    <div class="stat"><strong id="recordCount">0</strong><span>RACE RECORDS</span></div>
+    <div class="stat"><strong id="goalCount">0/0</strong><span>GOALS COMPLETE</span></div>
+    <div class="stat"><strong id="tipCount">0</strong><span>SAVED TIPS</span></div>
+  </section>
+</header>
+
+<main>
+  <nav aria-label="Companion sections">
+    <button class="active" data-tab="records">🏆 Records</button>
+    <button data-tab="tips">⚡ Trick Lab</button>
+    <button data-tab="practice">🎯 Practice</button>
+    <button data-tab="backup">💾 Backup</button>
+  </nav>
+
+  <section id="records" class="panel">
+    <h2>🏆 Race record tracker</h2>
+    <p class="muted">Record your own results after playing. These entries are not imported from the game.</p>
+    <form id="recordForm">
+      <label>Record title
+        <input id="recordTitle" maxlength="70" required placeholder="e.g. Best high jump">
+      </label>
+      <div class="grid">
+        <label>Record type
+          <select id="recordType">
+            <option>High jump</option><option>Race time</option>
+            <option>Race score</option><option>Win</option><option>Other</option>
+          </select>
+        </label>
+        <label>Value / result
+          <input id="recordValue" maxlength="60" required placeholder="e.g. 12 seconds">
+        </label>
+      </div>
+      <label>Track, character or notes (optional)
+        <textarea id="recordNotes" maxlength="500" placeholder="What worked? Which power-up did you use?"></textarea>
+      </label>
+      <button class="primary" type="submit">＋ Save race record</button>
+    </form>
+    <div class="row" style="margin-top:22px">
+      <h3>Your records</h3>
+      <select id="recordFilter" aria-label="Filter records" style="width:auto;max-width:155px">
+        <option value="All">All records</option>
+        <option>High jump</option><option>Race time</option>
+        <option>Race score</option><option>Win</option><option>Other</option>
+      </select>
+    </div>
+    <div id="recordList"></div>
+  </section>
+
+  <section id="tips" class="panel hidden">
+    <h2>⚡ Trick lab & strategy notes</h2>
+    <p class="muted">Save techniques you discover. These are your personal notes, not guaranteed game mechanics.</p>
+    <form id="tipForm">
+      <label>Tip title
+        <input id="tipTitle" maxlength="70" required placeholder="e.g. My high-jump technique">
+      </label>
+      <label>Instructions / discovery
+        <textarea id="tipBody" maxlength="1500" required placeholder="Write down the approach, timing, track and result..."></textarea>
+      </label>
+      <button class="primary" type="submit">＋ Save strategy</button>
+    </form>
+    <div id="tipList"></div>
+  </section>
+
+  <section id="practice" class="panel hidden">
+    <h2>🎯 Practice missions</h2>
+    <p class="muted">Tick off each goal when you finish it. Add your own challenges, too.</p>
+    <form id="goalForm">
+      <label>New practice goal
+        <input id="goalTitle" maxlength="100" required placeholder="e.g. Practise three jumps">
+      </label>
+      <button class="primary" type="submit">＋ Add mission</button>
+    </form>
+    <div class="row" style="margin-top:20px">
+      <h3>Your missions</h3>
+      <button id="clearDone" class="small">Remove completed</button>
+    </div>
+    <div id="goalList"></div>
+  </section>
+
+  <section id="backup" class="panel hidden">
+    <h2>💾 Your data & backup</h2>
+    <p class="muted">Your records, tips and missions are saved in this browser on this device. Clearing browser data or switching browsers can remove access to them.</p>
+    <div class="grid">
+      <button id="exportBtn" class="primary">↓ Export backup</button>
+      <button id="importBtn">↑ Import backup</button>
+    </div>
+    <input id="importFile" type="file" accept=".json,application/json" class="hidden">
+    <p class="muted">Export a JSON backup regularly. Importing a backup replaces the current companion data.</p>
+    <hr style="border-color:var(--line);margin:20px 0">
+    <h3>Reset companion</h3>
+    <p class="muted">Permanently remove the saved data from this browser.</p>
+    <button id="resetBtn" class="danger">Reset all data</button>
+    <p id="backupMessage" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<footer>
+  FAN-MADE COMPANION • Not affiliated with Vector Unit.<br>
+  Keep practising, keep racing.
+</footer>
+
+<script>
+"use strict";
+const KEY = "bbr_companion_v1";
+const starter = {
+  records: [],
+  tips: [
+    {id:"tip1",title:"Study your jump approach",body:"Observe the ramp, approach speed and landing. Record what you try and the result."},
+    {id:"tip2",title:"Compare power-ups",body:"Try different power-ups in practice and note which ones help your racing style."}
+  ],
+  goals: [
+    {id:"goal1",title:"Complete a practice race",done:false},
+    {id:"goal2",title:"Try a jump and record the result",done:false},
+    {id:"goal3",title:"Test a power-up strategy",done:false}
+  ]
+};
+let data = loadData();
+
+function cloneStarter() { return JSON.parse(JSON.stringify(starter)); }
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return cloneStarter();
+    const d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.records) || !Array.isArray(d.tips) ||
+        !Array.isArray(d.goals)) return cloneStarter();
+    return d;
+  } catch (e) { return cloneStarter(); }
+}
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    render();
+    return true;
+  } catch (e) {
+    alert("Could not save. Your browser storage may be full or disabled. Export a backup if possible.");
+    return false;
+  }
+}
+function id() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function actionButton(text, className, action) {
+  const b = el("button", "small " + (className || ""), text);
+  b.type = "button";
+  b.addEventListener("click", action);
+  return b;
+}
+function makeItem(title, body, buttons, value) {
+  const card = el("article", "item");
+  const row = el("div", "row");
+  row.append(el("h3", "", title));
+  if (value) row.append(el("div", "value", value));
+  card.append(row);
+  if (body) card.append(el("p", "", body));
+  if (buttons.length) {
+    const actions = el("div", "actions");
+    buttons.forEach(b => actions.append(b));
+    card.append(actions);
+  }
+  return card;
+}
+function removeItem(list, itemId) {
+  data[list] = data[list].filter(x => x.id !== itemId);
+  save();
+}
+function render() {
+  document.getElementById("recordCount").textContent = data.records.length;
+  const done = data.goals.filter(g => g.done).length;
+  document.getElementById("goalCount").textContent = done + "/" + data.goals.length;
+  document.getElementById("tipCount").textContent = data.tips.length;
+
+  const records = document.getElementById("recordList");
+  records.replaceChildren();
+  const filter = document.getElementById("recordFilter").value;
+  const shown = [...data.records].reverse().filter(r => filter === "All" || r.type === filter);
+  if (!shown.length) records.append(el("div","empty","No records here yet. Add your first result above."));
+  shown.forEach(r => {
+    records.append(makeItem(r.title, r.type + " • " + r.date +
+      (r.notes ? "\n" + r.notes : ""), [
+        actionButton("Delete","danger",() => {
+          if (confirm("Delete this record?")) removeItem("records",r.id);
+        })
+      ],r.value));
+  });
+
+  const tips = document.getElementById("tipList");
+  tips.replaceChildren();
+  if (!data.tips.length) tips.append(el("div","empty","No saved tips yet."));
+  [...data.tips].reverse().forEach(t => tips.append(makeItem(t.title,t.body,[
+    actionButton("Delete","danger",() => {
+      if (confirm("Delete this strategy?")) removeItem("tips",t.id);
+    })
+  ])));
+
+  const goals = document.getElementById("goalList");
+  goals.replaceChildren();
+  if (!data.goals.length) goals.append(el("div","empty","No missions. Add your next challenge above."));
+  data.goals.forEach(g => {
+    const card = el("article","item" + (g.done ? " done" : ""));
+    const label = el("label","check");
+    const checkbox = el("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = !!g.done;
+    checkbox.setAttribute("aria-label","Complete " + g.title);
+    checkbox.addEventListener("change",() => {
+      g.done = checkbox.checked;
+      save();
+    });
+    const title = el("span","",g.title);
+    label.append(checkbox,title);
+    card.append(label);
+    card.append(el("p","",g.done ? "Mission completed!" : "Mission in progress"));
+    card.append(actionButton("Delete mission","danger",() => {
+      if (confirm("Delete this mission?")) removeItem("goals",g.id);
+    }));
+    goals.append(card);
+  });
+}
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click",() => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active",b===button));
+    document.querySelectorAll("main > section").forEach(s =>
+      s.classList.toggle("hidden",s.id !== button.dataset.tab));
+  });
+});
+
+document.getElementById("recordForm").addEventListener("submit",e => {
+  e.preventDefault();
+  data.records.push({
+    id:id(), title:document.getElementById("recordTitle").value.trim(),
+    type:document.getElementById("recordType").value,
+    value:document.getElementById("recordValue").value.trim(),
+    notes:document.getElementById("recordNotes").value.trim(),
+    date:new Date().toLocaleDateString()
+  });
+  if (save()) e.target.reset();
+});
+document.getElementById("recordFilter").addEventListener("change",render);
+
+document.getElementById("tipForm").addEventListener("submit",e => {
+  e.preventDefault();
+  data.tips.push({
+    id:id(), title:document.getElementById("tipTitle").value.trim(),
+    body:document.getElementById("tipBody").value.trim()
+  });
+  if (save()) e.target.reset();
+});
+document.getElementById("goalForm").addEventListener("submit",e => {
+  e.preventDefault();
+  data.goals.push({id:id(),title:document.getElementById("goalTitle").value.trim(),done:false});
+  if (save()) e.target.reset();
+});
+document.getElementById("clearDone").addEventListener("click",() => {
+  if (!data.goals.some(g => g.done)) return alert("There are no completed missions to remove.");
+  if (confirm("Remove all completed missions?")) {
+    data.goals = data.goals.filter(g => !g.done);
+    save();
+  }
+});
+
+document.getElementById("exportBtn").addEventListener("click",() => {
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = el("a");
+  a.href = url;
+  a.download = "bbr-companion-backup.json";
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url),1000);
+  document.getElementById("backupMessage").textContent = "Backup export requested. Check your Downloads folder.";
+});
+document.getElementById("importBtn").addEventListener("click",() => {
+  document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change",async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    if (!d || !Array.isArray(d.records) || !Array.isArray(d.tips) || !Array.isArray(d.goals) ||
+        !d.records.every(x => x && typeof x.title === "string" && typeof x.value === "string" && typeof x.type === "string") ||
+        !d.tips.every(x => x && typeof x.title === "string" && typeof x.body === "string") ||
+        !d.goals.every(x => x && typeof x.title === "string")) {
+      throw new Error("Invalid backup structure");
+    }
+    if (confirm("Replace your current records, tips and missions with this backup?")) {
+      const previous = data;
+      data = {
+        records:d.records.map(x => ({id:String(x.id || id()),title:x.title,type:x.type,value:x.value,notes:String(x.notes || ""),date:String(x.date || "")})),
+        tips:d.tips.map(x => ({id:String(x.id || id()),title:x.title,body:x.body})),
+        goals:d.goals.map(x => ({id:String(x.id || id()),title:x.title,done:!!x.done}))
+      };
+      if (save()) document.getElementById("backupMessage").textContent = "Backup imported.";
+      else data = previous;
+    }
+  } catch (err) {
+    alert("That file doesn't look like a valid companion backup.");
+  }
+  e.target.value = "";
+});
+document.getElementById("resetBtn").addEventListener("click",() => {
+  if (!confirm("Delete ALL saved records, tips and missions from this browser? Export a backup first if needed.")) return;
+  const previous = data;
+  data = cloneStarter();
+  try {
+    localStorage.setItem(KEY,JSON.stringify(data));
+    render();
+    document.getElementById("backupMessage").textContent = "Companion reset to starter data.";
+  } catch (e) {
+    data = previous;
+    alert("Reset could not be saved. Browser storage may be unavailable.");
+  }
+});
+render();
+</script>
+</body>
+                                    </html>
+                                    
